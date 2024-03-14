@@ -7,38 +7,35 @@ local bar = require("djor.bar")
 local style = require("djor.style")
 local keys = require("djor.keys")
 
-require('djor.errors')
 require("awful.autofocus")
 require("awful.hotkeys_popup.keys")
+
+require('djor.errors')
+require('djor.keys')
 
 beautiful.init(style.theme)
 
 awful.layout.layouts = {
-  awful.layout.suit.tile.left,
-  awful.layout.suit.tile.top,
+  awful.layout.suit.tile.left, -- Used for main horizontal display
+  awful.layout.suit.tile.top,  -- Used for second vertical display
 }
 
-local tag_count = 1
-local screen_count = 1
-
+local screen_idx = 1
 awful.screen.connect_for_each_screen(function(s)
-  for _ = 1, 4 do
-    local layout = awful.layout.layouts[screen_count]
-    awful.tag.add(tostring(tag_count), {
+  for i = 1, 4 do
+    local layout = awful.layout.layouts[screen_idx]
+    local tag_idx = (screen_idx - 1) * 4 + i
+    awful.tag.add(tostring(tag_idx), {
       screen = s,
       layout = layout,
     })
-
-    tag_count = tag_count + 1
   end
 
   style.wallpaper:init(s)
   bar.init(s)
 
-  screen_count = screen_count + 1
+  screen_idx = screen_idx + 1
 end)
-
-require('djor.keys')
 
 awful.rules.rules = {
   {
@@ -87,6 +84,4 @@ end)
 
 client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
-
--- Set wallpaper when screen geometry changes
 screen.connect_signal("property::geometry", style.wallpaper.init)

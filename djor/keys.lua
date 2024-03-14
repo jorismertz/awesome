@@ -7,7 +7,9 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 
 local modkey = "Mod4"
 local M = {
-  modkey = modkey
+  modkey = modkey,
+  tags_per_screen = 4,
+  screens_by_index = {}
 }
 
 M.globalkeys = gears.table.join(
@@ -49,10 +51,11 @@ M.globalkeys = gears.table.join(
   awful.key({}, "XF86AudioPlay", function() awful.util.spawn("playerctl play-pause") end),
   awful.key({}, "XF86AudioNext", function() awful.util.spawn("playerctl next") end),
   awful.key({}, "XF86AudioPrev", function() awful.util.spawn("playerctl previous") end),
+
   -- Pamixer doesn't work when called from awesome for some reason.
-  awful.key({}, "XF86AudioRaiseVolume", function() awful.util.spawn("pamixer --increase 5") end),
-  awful.key({}, "XF86AudioLowerVolume", function() awful.util.spawn("pamixer --decrease 5") end),
-  awful.key({}, "XF86AudioMute", function() awful.util.spawn("pamixer --toggle-mute") end),
+  -- awful.key({}, "XF86AudioRaiseVolume", function() awful.util.spawn("pamixer --increase 5") end),
+  -- awful.key({}, "XF86AudioLowerVolume", function() awful.util.spawn("pamixer --decrease 5") end),
+  -- awful.key({}, "XF86AudioMute", function() awful.util.spawn("pamixer --toggle-mute") end),
 
   -- Layout manipulation
   awful.key({ modkey, "Shift" }, "j", function() awful.client.swap.byidx(1) end,
@@ -73,7 +76,6 @@ M.globalkeys = gears.table.join(
       end
     end,
     { description = "go back", group = "client" }),
-  --
   awful.key({ modkey, }, "Return", function() awful.spawn(applications.terminal) end,
     { description = "open a terminal", group = "launcher" }),
   awful.key({ modkey, "Shift" }, "s", function() awful.spawn(applications.music) end,
@@ -184,12 +186,8 @@ M.clientkeys = gears.table.join(
     { description = "(un)maximize horizontally", group = "client" })
 )
 
-
-local tags_per_screen = 4
-local screens_by_index = {}
-local i = 1
 for s in screen do
-  table.insert(screens_by_index, i, s)
+  table.insert(M.screens_by_index, s)
 end
 
 -- For some reason awesome has my displays reversed.
@@ -200,7 +198,7 @@ local screen_map = {
 
 ---@param tag_index integer
 local function get_screen_index(tag_index)
-  if tag_index <= tags_per_screen then
+  if tag_index <= M.tags_per_screen then
     return screen_map[1]
   else
     return screen_map[2]
@@ -213,14 +211,14 @@ end
 ---@return tag
 local function get_relative_tag(tag)
   local s = get_screen_index(tag)
-  if tag > tags_per_screen then
-    return screens_by_index[s].tags[tag - tags_per_screen]
+  if tag > M.tags_per_screen then
+    return M.screens_by_index[s].tags[tag - M.tags_per_screen]
   end
-  return screens_by_index[s].tags[tag]
+  return M.screens_by_index[s].tags[tag]
 end
 
 
-for i = 1, tags_per_screen * 2 + 1 do
+for i = 1, M.tags_per_screen * 2 + 1 do
   M.globalkeys = gears.table.join(M.globalkeys,
     -- View tag only.
     awful.key({ modkey }, "#" .. i + 8,

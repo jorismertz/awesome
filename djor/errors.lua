@@ -5,6 +5,8 @@ awesome = awesome
 screen = screen
 client = client
 root = root
+mouse = mouse
+bar = bar
 
 if awesome.startup_errors then
   naughty.notify({
