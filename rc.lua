@@ -1,6 +1,5 @@
-pcall(require, "luarocks.loader")
+-- pcall(require, "luarocks.loader")
 
-local gears = require("gears")
 local awful = require("awful")
 local beautiful = require("beautiful")
 local bar = require("bar")

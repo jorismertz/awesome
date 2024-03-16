@@ -4,6 +4,7 @@ local awful = require("awful")
 local applications = require("djor.apps")
 local menubar = require("menubar")
 local hotkeys_popup = require("awful.hotkeys_popup")
+local home_assistant = require("djor.hass")
 
 local modkey = "Mod4"
 local M = {
@@ -56,6 +57,15 @@ M.globalkeys = gears.table.join(
   -- awful.key({}, "XF86AudioRaiseVolume", function() awful.util.spawn("pamixer --increase 5") end),
   -- awful.key({}, "XF86AudioLowerVolume", function() awful.util.spawn("pamixer --decrease 5") end),
   -- awful.key({}, "XF86AudioMute", function() awful.util.spawn("pamixer --toggle-mute") end),
+
+
+
+  awful.key({ modkey }, "Prior", home_assistant.next_scene,
+    { description = "Cycle to next light scene", group = "client" }),
+  awful.key({ modkey }, "Next", home_assistant.previous_scene,
+    { description = "Cycle to previous light scene", group = "client" }),
+  awful.key({ modkey }, "F1", function() require 'djor.testing'.main() end,
+    { description = "Run tests", group = "client" }),
 
   -- Layout manipulation
   awful.key({ modkey, "Shift" }, "j", function() awful.client.swap.byidx(1) end,
@@ -272,10 +282,9 @@ for i = 1, M.tags_per_screen * 2 + 1 do
   )
 end
 
+-- this one is broken, bar is undefined here. fix later :)
 root.buttons(gears.table.join(
-  awful.button({}, 3, function() bar.main_menu:toggle() end),
-  awful.button({}, 4, awful.tag.viewnext),
-  awful.button({}, 5, awful.tag.viewprev)
+  awful.button({}, 3, function() bar.main_menu:toggle() end)
 ))
 
 M.clientbuttons = gears.table.join(

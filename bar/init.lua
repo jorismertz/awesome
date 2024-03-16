@@ -44,7 +44,7 @@ M.init = function(s)
   local spotify_widget = spotify:widget({
     scroll = true,
     formatter = function(str)
-      return utils.html_text_style(str, colors.foam)
+      return utils.html_text_style(str, colors.foam, nil, true)
     end
   })
 
@@ -53,13 +53,14 @@ M.init = function(s)
     awful.button({}, 1, function() awful.layout.inc(1) end),
     awful.button({}, 3, function() awful.layout.inc(-1) end),
     awful.button({}, 4, function() awful.layout.inc(1) end),
-    awful.button({}, 5, function() awful.layout.inc(-1) end)))
+    awful.button({}, 5, function() awful.layout.inc(-1) end)
+  ))
 
-  s.tag_list = awful.widget.taglist {
+  s.tag_list = awful.widget.taglist({
     screen  = s,
     filter  = awful.widget.taglist.filter.all,
-    buttons = taglist_buttons
-  }
+    buttons = taglist_buttons,
+  })
 
   s.mywibox = awful.wibar({ position = "top", opacity = 0.8, screen = s })
 

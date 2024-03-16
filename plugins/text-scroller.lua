@@ -33,7 +33,10 @@ end
 
 ---@param callback function
 function M:_start_scroll(callback)
-  local timer = gears.timer({ timeout = self.speed })
+  local timer = gears.timer({
+    call_now = true,
+    timeout = self.speed
+  })
   timer:connect_signal("timeout", function()
     self.state = self:_scroll()
     callback(self.state)
@@ -50,9 +53,9 @@ end
 
 ---@param config table
 ---@param callback function Function that will be called with the current state of the scroller on each update
-function M:create(config, callback)
+function M:create(config)
   self:_apply_config(config)
-  self:_start_scroll(callback)
+  self:_start_scroll(config.callback)
 
   return self
 end
