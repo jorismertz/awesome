@@ -5,7 +5,6 @@ local playerctl = bling.signal.playerctl.lib()
 
 local M = {
   initialized = false,
-  timer = nil,
   scroller = nil,
   formatter = nil,
   scroll_enabled = true,
@@ -56,6 +55,7 @@ function M:create_scroller(content, callback)
       end
     })
   else
+    self.scroller = nil
     callback(content)
   end
 end
@@ -79,6 +79,10 @@ function M:widget(opts)
         album = album,
         playing = new
       }
+
+      if self.scroller then
+        self.scroller:stop()
+      end
 
       self:create_scroller(self:format_status(self.state), function(str)
         if self.formatter then

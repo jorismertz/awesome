@@ -45,14 +45,13 @@ function M:_start_scroll(callback)
   self.timer = timer
 end
 
-function M:_stop_scroll()
+function M:stop()
   if self.timer then
     self.timer:stop()
   end
 end
 
 ---@param config table
----@param callback function Function that will be called with the current state of the scroller on each update
 function M:create(config)
   self:_apply_config(config)
   self:_start_scroll(config.callback)
