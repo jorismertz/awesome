@@ -3,7 +3,7 @@ pcall(require, "luarocks.loader")
 local gears = require("gears")
 local awful = require("awful")
 local beautiful = require("beautiful")
-local bar = require("djor.bar")
+local bar = require("bar")
 local style = require("djor.style")
 local keys = require("djor.keys")
 
@@ -16,23 +16,36 @@ require('djor.keys')
 beautiful.init(style.theme)
 
 awful.layout.layouts = {
-  awful.layout.suit.tile.left, -- Used for main horizontal display
-  awful.layout.suit.tile.top,  -- Used for second vertical display
+  awful.layout.suit.tile.left,   -- Used for main horizontal display
+  awful.layout.suit.tile.bottom, -- Used for second vertical display
+}
+
+local layout_master_width_factors = {
+  0.7,
+  0.68
+}
+
+local tags = {
+  "TERM",
+  "WEB",
 }
 
 local screen_idx = 1
 awful.screen.connect_for_each_screen(function(s)
   for i = 1, 4 do
-    local layout = awful.layout.layouts[screen_idx]
     local tag_idx = (screen_idx - 1) * 4 + i
-    awful.tag.add(tostring(tag_idx), {
+    local tag_name = tags[i] or tostring(tag_idx)
+
+    awful.tag.add(tag_name, {
       screen = s,
-      layout = layout,
+      layout = awful.layout.layouts[screen_idx],
+      master_width_factor = layout_master_width_factors[screen_idx],
+      selected = i == 1
     })
   end
 
   style.wallpaper:init(s)
-  bar.init(s)
+  if screen_idx == 1 then bar.init(s) end
 
   screen_idx = screen_idx + 1
 end)
@@ -40,7 +53,6 @@ end)
 awful.rules.rules = {
   {
     rule = {},
-    -- This line makes sure new windows won't replace the current master window
     callback = awful.client.setslave,
     properties = {
       border_width = beautiful.border_width,
@@ -70,9 +82,10 @@ awful.rules.rules = {
     properties = { floating = true }
   },
 
-  -- Set Firefox to always map on the tag named "2" on screen 1.
-  -- { rule = { class = "Firefox" },
-  --   properties = { screen = 1, tag = "2" } },
+  -- {
+  --   rule = { class = "Firefox" },
+  --   properties = { screen = 1, tag = "WEB" }
+  -- },
 }
 
 -- Mouse follows focus

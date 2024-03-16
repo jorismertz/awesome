@@ -22,7 +22,7 @@ local theme = {
   fg_urgent = colors.gold,
   fg_minimize = colors.highlightHigh,
 
-  useless_gap = dpi(5),
+  useless_gap = dpi(2),
   border_width = dpi(3),
   border_normal = colors.highlightLow,
   border_focus = colors.love,

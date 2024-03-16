@@ -30,8 +30,9 @@ M.launcher = awful.widget.launcher({
 
 menubar.utils.terminal = applications.terminal
 
-local mykeyboardlayout = awful.widget.keyboardlayout()
-local mytextclock = wibox.widget.textclock()
+local colors = require('djor.style').colors
+local date_format = utils.html_text_style("%y/%m/%d %H:%M:%S", colors.gold)
+local clock = wibox.widget.textclock(date_format, 1)
 
 local taglist_buttons = gears.table.join(
   awful.button({}, 1, function(t) t:view_only() end)
@@ -39,6 +40,13 @@ local taglist_buttons = gears.table.join(
 
 M.init = function(s)
   s.prompt_box = awful.widget.prompt()
+  local spotify = require('bar.modules.spotify')
+  local spotify_widget = spotify:widget({
+    scroll = true,
+    formatter = function(str)
+      return utils.html_text_style(str, colors.foam)
+    end
+  })
 
   s.layout_box = awful.widget.layoutbox(s)
   s.layout_box:buttons(gears.table.join(
@@ -57,24 +65,22 @@ M.init = function(s)
 
   s.mywibox:setup {
     layout = wibox.layout.align.horizontal,
-    -- Left widgets
+    expand = "none",
     {
-      layout = wibox.layout.fixed.horizontal,
+      layout = wibox.layout.align.horizontal,
       M.launcher,
       s.tag_list,
       s.prompt_box,
     },
-
-    -- Middle widget
-    s.mytasklist,
-
-    -- Right widgets
     {
-      layout = wibox.layout.fixed.horizontal,
-      mykeyboardlayout,
-      wibox.widget.systray(),
-      mytextclock,
-      s.layout_box,
+      layout = wibox.layout.align.horizontal,
+      clock,
+    },
+    {
+      layout = wibox.layout.align.horizontal,
+      spotify_widget,
+      wibox.layout.margin(wibox.widget.systray(), 10, 10, 10, 10),
+      -- s.layout_box,
     },
   }
 end

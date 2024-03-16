@@ -191,9 +191,11 @@ for s in screen do
 end
 
 -- For some reason awesome has my displays reversed.
+-- and now after a reboot they aren't !?!?!?!
+-- god give me strength
 local screen_map = {
-  [1] = 2,
-  [2] = 1
+  [1] = 1,
+  [2] = 2
 }
 
 ---@param tag_index integer
