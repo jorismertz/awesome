@@ -14,8 +14,8 @@ local M = {
 }
 
 M.globalkeys = gears.table.join(
-  awful.key({ modkey, "Shift" }, "s", hotkeys_popup.show_help,
-    { description = "show help", group = "awesome" }),
+-- awful.key({ modkey, "Shift" }, "s", hotkeys_popup.show_help,
+--   { description = "show help", group = "awesome" }),
   awful.key({ modkey, }, "Left", awful.tag.viewprev,
     { description = "view previous", group = "tag" }),
   awful.key({ modkey, }, "Right", awful.tag.viewnext,
@@ -52,20 +52,13 @@ M.globalkeys = gears.table.join(
   awful.key({}, "XF86AudioPlay", function() awful.util.spawn("playerctl play-pause") end),
   awful.key({}, "XF86AudioNext", function() awful.util.spawn("playerctl next") end),
   awful.key({}, "XF86AudioPrev", function() awful.util.spawn("playerctl previous") end),
-
-  -- Pamixer doesn't work when called from awesome for some reason.
-  -- awful.key({}, "XF86AudioRaiseVolume", function() awful.util.spawn("pamixer --increase 5") end),
-  -- awful.key({}, "XF86AudioLowerVolume", function() awful.util.spawn("pamixer --decrease 5") end),
-  -- awful.key({}, "XF86AudioMute", function() awful.util.spawn("pamixer --toggle-mute") end),
-
-
-
+  awful.key({}, "XF86AudioRaiseVolume", function() awful.util.spawn("pamixer --increase 5") end),
+  awful.key({}, "XF86AudioLowerVolume", function() awful.util.spawn("pamixer --decrease 5") end),
+  awful.key({}, "XF86AudioMute", function() awful.util.spawn("pamixer --toggle-mute") end),
   awful.key({ modkey }, "Prior", home_assistant.next_scene,
     { description = "Cycle to next light scene", group = "client" }),
   awful.key({ modkey }, "Next", home_assistant.previous_scene,
     { description = "Cycle to previous light scene", group = "client" }),
-  awful.key({ modkey }, "F1", function() require 'djor.testing'.main() end,
-    { description = "Run tests", group = "client" }),
 
   -- Layout manipulation
   awful.key({ modkey, "Shift" }, "j", function() awful.client.swap.byidx(1) end,
@@ -96,6 +89,8 @@ M.globalkeys = gears.table.join(
     { description = "open launcher", group = "launcher" }),
   awful.key({}, "Print", function() awful.spawn(applications.screenshotmenu) end,
     { description = "open screenshotmenu", group = "launcher" }),
+  awful.key({ modkey }, "Home", function() awful.spawn(applications.displaymenu) end,
+    { description = "open dispaymenu", group = "launcher" }),
   awful.key({ modkey }, "o", function() awful.spawn(applications.audiomenu) end,
     { description = "open audiomenu", group = "launcher" }),
   awful.key({ modkey }, "End", function() awful.spawn(applications.powermenu) end,
@@ -223,10 +218,8 @@ end
 ---@return tag
 local function get_relative_tag(tag)
   local s = get_screen_index(tag)
-  if tag > M.tags_per_screen then
-    return M.screens_by_index[s].tags[tag - M.tags_per_screen]
-  end
-  return M.screens_by_index[s].tags[tag]
+  local idx = tag - M.tags_per_screen * (s - 1)
+  return M.screens_by_index[s].tags[idx]
 end
 
 
@@ -243,19 +236,16 @@ for i = 1, M.tags_per_screen * 2 + 1 do
       end,
       { description = "view tag #" .. i, group = "tag" }),
 
-    -- Not quite sure what this is usefull for.
-    -- Toggle tag display.
-    -- awful.key({ Modkey, "Control" }, "#" .. i + 8,
-    --   function()
-    --     local tag = get_relative_tag(i - 1)
-    --
-    --     if tag then
-    --       awful.tag.viewtoggle(tag)
-    --     end
-    --   end,
-    --   { description = "toggle tag #" .. i, group = "tag" }),
+    awful.key({ modkey, "Control" }, "#" .. i + 8,
+      function()
+        local tag = get_relative_tag(i - 1)
 
-    -- Move client to tag. focus follows
+        if tag then
+          awful.tag.viewtoggle(tag)
+        end
+      end,
+      { description = "toggle tag #" .. i, group = "tag" }),
+
     awful.key({ modkey, "Shift" }, "#" .. i + 8,
       function()
         if client.focus then

@@ -1,25 +1,46 @@
+local utils = require("djor.utils")
 local bling = require("plugins.bling")
 local scroller = require("plugins.text-scroller")
 local wibox = require("wibox")
 local playerctl = bling.signal.playerctl.lib()
 
+-- Todo
+-- refactor scroll state to directly implement the config of the scroller claass
+-- this way i think we can pass along the types aswell to lua ls
+---@class Spotify
+---@field public formatter function?
+---@field public scroll table
+---
 local M = {
-  initialized = false,
-  scroller = nil,
   formatter = nil,
-  scroll_enabled = true,
+  scroll = {
+    enabled = true,
+    type = nil,
+    speed = 1,
+    max_width = 30,
+
+    _scroller = nil
+  },
+  scrollers = {
+    bounce_scroll = scroller.bounce_scroll,
+  },
+
   state = {
     title = nil,
     artist = nil,
     album = nil,
     playing = nil,
-  }
+  },
 }
 
 ---@param state table
 function M:format_status(state)
   if not state.title or not state.artist then
-    return "No song playing"
+    local msg = "No song playing"
+    if self.formatter then
+      return self.formatter(msg)
+    end
+    return msg
   end
 
   return state.title .. " - " .. state.artist
@@ -33,7 +54,9 @@ function M:apply_config(opts)
   end
 
   if opts.scroll ~= nil then
-    self.scroll_enabled = opts.scroll
+    self.scroll.enabled = opts.scroll.enabled
+    self.scroll.speed = opts.scroll.speed
+    self.scroll.max_width = opts.scroll.max_width
   end
 
   if opts.formatter then
@@ -45,17 +68,16 @@ end
 ---@param callback function
 ---@return nil
 function M:create_scroller(content, callback)
-  if #content > 30 and self.scroll_enabled then
-    self.scroller = scroller:create({
+  if #content > self.scroll.max_width and self.scroll.enabled then
+    self.scroll._scroller = scroller:create({
       str = content,
-      max_width = 30,
-      speed = 1,
-      callback = function(str)
-        callback(str)
-      end
+      max_width = self.scroll.max_width,
+      speed = self.scroll.speed,
+      scroller = scroller.bounce_scroll,
+      callback = callback
     })
   else
-    self.scroller = nil
+    self.scroll._scroller = nil
     callback(content)
   end
 end
@@ -72,7 +94,11 @@ function M:widget(opts)
 
 
   playerctl:connect_signal("metadata",
-    function(_, title, artist, _, album, new, _)
+    function(_, title, artist, _, album, new, player_name)
+      if player_name ~= "spotify" then
+        return
+      end
+
       self.state = {
         title = title,
         artist = artist,
@@ -80,8 +106,9 @@ function M:widget(opts)
         playing = new
       }
 
-      if self.scroller then
-        self.scroller:stop()
+      if self.scroll._scroller then
+        utils.debug("Stopping scroller")
+        self.scroll._scroller:stop()
       end
 
       self:create_scroller(self:format_status(self.state), function(str)

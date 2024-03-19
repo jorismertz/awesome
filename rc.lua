@@ -2,7 +2,7 @@
 
 local awful = require("awful")
 local beautiful = require("beautiful")
-local bar = require("bar")
+local bar = require("djor.bar")
 local style = require("djor.style")
 local keys = require("djor.keys")
 

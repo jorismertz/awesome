@@ -16,6 +16,29 @@ M.awesome_menu = {
   { "quit",    awesome.quit },
 }
 
+local tasklist_buttons = gears.table.join(
+  awful.button({}, 1, function(c)
+    if c == client.focus then
+      c.minimized = true
+    else
+      c:emit_signal(
+        "request::activate",
+        "tasklist",
+        { raise = true }
+      )
+    end
+  end),
+  awful.button({}, 3, function()
+    awful.menu.client_list({ theme = { width = 250 } })
+  end),
+  awful.button({}, 4, function()
+    awful.client.focus.byidx(1)
+  end),
+  awful.button({}, 5, function()
+    awful.client.focus.byidx(-1)
+  end))
+
+
 M.main_menu = awful.menu({
   items = {
     { "awesome",       M.awesome_menu,       beautiful.awesome_icon },
@@ -38,15 +61,23 @@ local taglist_buttons = gears.table.join(
   awful.button({}, 1, function(t) t:view_only() end)
 )
 
+local function song_format(str)
+  return utils.html_text_style("󰎈 " .. str, colors.foam, nil, true)
+end
+
+local spotify = require('plugins.spotify')
+local spotify_widget = spotify:widget({
+  formatter = song_format,
+  scroll = {
+    type = spotify.scrollers.bounce_scroll,
+    enabled = true,
+    speed = 0.5,
+    max_width = 30
+  },
+})
+
 M.init = function(s)
   s.prompt_box = awful.widget.prompt()
-  local spotify = require('bar.modules.spotify')
-  local spotify_widget = spotify:widget({
-    scroll = true,
-    formatter = function(str)
-      return utils.html_text_style(str, colors.foam, nil, true)
-    end
-  })
 
   s.layout_box = awful.widget.layoutbox(s)
   s.layout_box:buttons(gears.table.join(
@@ -64,6 +95,11 @@ M.init = function(s)
 
   s.mywibox = awful.wibar({ position = "top", opacity = 0.8, screen = s })
 
+  s.mytasklist = awful.widget.tasklist {
+    screen = s,
+    filter = awful.widget.tasklist.filter.currenttags,
+    buttons = tasklist_buttons
+  }
   s.mywibox:setup {
     layout = wibox.layout.align.horizontal,
     expand = "none",
@@ -71,6 +107,7 @@ M.init = function(s)
       layout = wibox.layout.align.horizontal,
       M.launcher,
       s.tag_list,
+      s.mytasklist,
       s.prompt_box,
     },
     {
